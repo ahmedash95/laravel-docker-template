@@ -1,0 +1,32 @@
+version: '2'
+services:
+  webserver:
+    image: nginx:alpine
+    volumes:
+      - ./code:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    ports:
+      - "8080:80"
+  app:
+    ## read php image from our custom docker image ##
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    volumes:
+      ## copy project files to /var/www ##
+      - ./code:/var/www
+    working_dir: /var/www
+
+  db:
+    image: mysql:5.7
+    ports:
+      - "3388:3306"
+    volumes:
+      - ./docker-volumes-data/db:/var/lib/database
+    environment:
+      MYSQL_DATABASE: laravel_db
+      MYSQL_ROOT_PASSWORD: root
+  redis:
+    image: redis
+    volumes:
+      - ./docker-volumes-data/redis:/data
